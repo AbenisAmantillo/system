@@ -1,0 +1,98 @@
+{% extends 'layouts/admin_layout.html.twig' %}
+
+{% block title %}{{ company_name }} - Dashboard{% endblock %}
+
+{% block content %}
+        <!-- Navigation Tabs -->
+        <div class="dashboard-tabs">
+            <button class="tab-button active" data-tab="overview">Overview</button>
+        </div>
+
+        <!-- Overview Tab Content -->
+        <div id="overview-tab" class="tab-content active">
+        <!-- Metrics Cards -->
+        <div class="metrics-row">
+            <div class="metric-card-modern">
+                <div class="metric-header">
+                    <div>
+                        <div class="metric-label-modern">Total Properties</div>
+                        <div class="metric-value-modern">{{ metrics.total_properties }}</div>
+                    </div>
+                    <div class="metric-icon-modern">🏢</div>
+                </div>
+            </div>
+            
+            <div class="metric-card-modern">
+                <div class="metric-header">
+                    <div>
+                        <div class="metric-label-modern">Pending Properties</div>
+                        <div class="metric-value-modern">{{ metrics.properties_pending }}</div>
+                    </div>
+                    <div class="metric-icon-modern">🏠</div>
+                </div>
+            </div>
+            
+            <div class="metric-card-modern">
+                <div class="metric-header">
+                    <div>
+                        <div class="metric-label-modern">Total Properties Sold</div>
+                        <div class="metric-value-modern">{{ metrics.properties_sold }}</div>
+                    </div>
+                    <div class="metric-icon-modern">🏘️</div>
+                </div>
+            </div>
+
+            <div class="metric-card-modern">
+                <div class="metric-header">
+                    <div>
+                        <div class="metric-label-modern">Total Furniture</div>
+                        <div class="metric-value-modern">{{ metrics.total_furnitures }}</div>
+                    </div>
+                    <div class="metric-icon-modern">🛏️</div>
+                </div>
+            </div>
+
+            <div class="metric-card-modern">
+                <div class="metric-header">
+                    <div>
+                        <div class="metric-label-modern">Total Furnitures Sold</div>
+                        <div class="metric-value-modern">{{ metrics.furnitures_sold }}</div>
+                    </div>
+                    <div class="metric-icon-modern">🗄️</div>
+                </div>
+            </div>
+            
+            <div class="metric-card-modern">
+                <div class="metric-header">
+                    <div>
+                        <div class="metric-label-modern">Total Revenue</div>
+                        <div class="metric-value-modern">{{ metrics.total_revenue }}</div>
+                    </div>
+                    <div class="metric-icon-modern">💰</div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <script>
+            // Tab switching functionality
+            document.addEventListener('DOMContentLoaded', function() {
+                const tabButtons = document.querySelectorAll('.tab-button');
+                const tabContents = document.querySelectorAll('.tab-content');
+
+                tabButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const targetTab = this.getAttribute('data-tab');
+
+                        // Remove active class from all buttons and contents
+                        tabButtons.forEach(btn => btn.classList.remove('active'));
+                        tabContents.forEach(content => content.classList.remove('active'));
+
+                        // Add active class to clicked button and corresponding content
+                        this.classList.add('active');
+                        document.getElementById(targetTab + '-tab').classList.add('active');
+                    });
+                });
+            });
+        </script>
+{% endblock %}

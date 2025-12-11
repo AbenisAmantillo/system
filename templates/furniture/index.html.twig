@@ -1,0 +1,79 @@
+{% extends 'layouts/admin_layout.html.twig' %}
+
+{% block title %}Furniture Listings{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/crud.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="property-container">
+        <div class="property-header">
+            <h1>
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-right: 0.5rem;">
+                    <rect x="3" y="8" width="18" height="12" rx="2"></rect>
+                    <path d="M7 8V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3"></path>
+                </svg>
+                Manage Furniture
+            </h1>
+            <p>Browse all furniture items currently available in your dashboard</p>
+        </div>
+
+        <table class="property-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for furniture in furniture %}
+                    <tr>
+                        <td>{{ furniture.id }}</td>
+                        <td>{{ furniture.name }}</td>
+                        <td>₱{{ furniture.price|number_format(2, '.', ',') }}</td>
+                        <td>{{ furniture.stock ?? 'N/A' }}</td>
+                        <td>{{ furniture.status }}</td>
+                        <td>
+                            <div class="actions">
+                                <a href="{{ path('app_furniture_show', {'id': furniture.id}) }}" class="btn btn-secondary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                    View
+                                </a>
+                                <a href="{{ path('app_furniture_edit', {'id': furniture.id}) }}" class="btn btn-primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 20h9"></path>
+                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
+                                    </svg>
+                                    Edit
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6">No furniture items found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="button-group">
+            <a href="{{ path('app_furniture_new') }}" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Create New Furniture
+            </a>
+        </div>
+    </div>
+{% endblock %}

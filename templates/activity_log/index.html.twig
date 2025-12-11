@@ -1,0 +1,127 @@
+{% extends 'layouts/admin_layout.html.twig' %}
+
+{% block title %}Activity Logs{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('app') }}
+{% endblock %}
+
+{% block content %}
+<div class="activity-logs-container">
+    <!-- Flash Messages -->
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}" style="padding: 1rem 1.5rem; margin-bottom: 1.5rem; border-radius: 8px; 
+                {% if label == 'success' %}background: #d4edda; color: #155724; border: 1px solid #c3e6cb;
+                {% elseif label == 'error' %}background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+                {% else %}background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <!-- Header Section -->
+    <div class="activity-logs-header">
+        <div class="header-left">
+            <h1>
+                📋 Activity Logs
+            </h1>
+            <p>View all user login and logout activity</p>
+        </div>
+        {% if logs|length > 0 %}
+        <div class="header-right">
+            <form id="clear-all-form" method="POST" action="{{ path('app_activity_log_clear_all') }}" style="display: inline;">
+                <input type="hidden" name="_token" value="{{ csrf_token('clear_all_logs') }}">
+                <button type="submit" class="clear-all-button" onclick="return confirmClearAll(event)">
+                    🗑️ Clear All
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Logs Table -->
+    <div class="logs-table-wrapper">
+        {% if logs|length > 0 %}
+        <table class="logs-table">
+            <thead>
+                <tr>
+                    <th>Date/Time</th>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.createdAt|date('Y-m-d H:i:s') }}</td>
+                    <td><strong>{% if 'ROLE_ADMIN' in log.roles %}admin{% elseif 'ROLE_STAFF' in log.roles %}staff{% elseif 'ROLE_USER' in log.roles %}client{% else %}{{ log.username }}{% endif %}</strong></td>
+                    <td>
+                        {% for role in log.roles %}
+                            <span class="role-badge role-{{ role|lower|replace({'role_': ''}) }}">{{ role }}</span>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% set actionClass = 'action-' ~ log.action|lower|replace({' ': '-'}) %}
+                        <span class="action-badge {{ actionClass }}">{{ log.action }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <h3>No Activity Logs Found</h3>
+            <p>Activity logs will appear here once users start interacting with the system.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function confirmClearAll(event) {
+        event.preventDefault();
+        const confirmed = confirm('Are you sure you want to delete all activity logs? This action cannot be undone.');
+        if (confirmed) {
+            document.getElementById('clear-all-form').submit();
+        }
+        return false;
+    }
+</script>
+
+<style>
+    .header-right {
+        display: flex;
+        align-items: center;
+    }
+
+    .clear-all-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+    }
+
+    .clear-all-button:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+    }
+
+    .clear-all-button:active {
+        transform: translateY(0);
+    }
+</style>
+{% endblock %}
+

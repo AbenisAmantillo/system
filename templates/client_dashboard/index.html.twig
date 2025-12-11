@@ -1,0 +1,424 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Client Dashboard{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/landing.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/dashboard.css') }}">
+{% endblock %}
+
+{% block body %}
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <div class="logo-image"></div>
+                <span class="logo-text">The Amantillo Property Co.</span>
+            </a>
+            <div class="nav-buttons" style="display: flex; align-items: center; gap: 1rem;">
+                <div class="profile-dropdown" style="position: relative;">
+                    <button class="profile-trigger" onclick="toggleProfileDropdown()" style="display: flex; align-items: center; gap: 0.75rem; background: #f0f2ff; padding: 0.5rem 1rem; border-radius: 25px; border: 1px solid #e0e7ff; cursor: pointer; transition: all 0.3s;">
+                        <div style="width: 35px; height: 35px; background: #5b6fd8; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border: 2px solid #667eea;">
+                            👤
+                        </div>
+                        <span style="color: #1f2937; font-weight: 500; font-size: 0.95rem;">
+                            Hi, {{ app.user ? app.user.username : 'Guest' }}!
+                        </span>
+                        <span style="color: #6b7280; font-size: 0.75rem; margin-left: 0.25rem;">▼</span>
+                    </button>
+                    <div id="profile-dropdown-menu" class="profile-dropdown-menu" style="display: none; position: absolute; top: calc(100% + 0.5rem); right: 0; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); min-width: 200px; z-index: 1000; overflow: hidden; border: 1px solid #e5e7eb;">
+                        <div style="padding: 1rem; border-bottom: 1px solid #e5e7eb; background: #f9fafb;">
+                            <div style="font-weight: 600; color: #1f2937; font-size: 0.95rem;">{{ app.user ? app.user.username : 'Guest' }}</div>
+                            <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">User Account</div>
+                        </div>
+                        <div style="padding: 0.5rem;">
+                            <a href="{{ path('app_logout') }}" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: #dc2626; text-decoration: none; border-radius: 8px; transition: all 0.2s; font-weight: 500; font-size: 0.95rem;">
+                                <span>🚪</span>
+                                <span>Log Out</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Find Your Dream Home</h1>
+            <p>Discover the perfect property from our extensive collection of premium real estate</p>
+        </div>
+    </section>
+
+    <!-- Dashboard Content with Tabs -->
+    <div style="max-width: 1400px; margin: 0 auto; padding: 2rem;">
+        <!-- Navigation Tabs -->
+        <div class="dashboard-tabs">
+            <button class="tab-button active" data-tab="overview">Overview</button>
+            <button class="tab-button" data-tab="payment">Payment</button>
+        </div>
+
+        <!-- Overview Tab Content -->
+        <div id="overview-tab" class="tab-content active">
+            <!-- Stats Section -->
+            <section class="stats">
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <h3>{{ total_properties }}</h3>
+                        <p>Total Properties</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>{{ total_furniture }}</h3>
+                        <p>Available Furniture</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>{{ featured_properties|length }}</h3>
+                        <p>Featured Listings</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Featured Properties Section -->
+            <section class="featured">
+                <div class="section-header">
+                    <h2>Featured Properties</h2>
+                    <p>Explore our handpicked selection of premium properties</p>
+                </div>
+                
+                <div class="properties-grid">
+                    {% for property in featured_properties %}
+                    <div class="property-card">
+                        <div class="property-image">
+                            {% if property.imageFileName %}
+                                <img src="{{ asset('uploads/property_images/' ~ property.imageFileName) }}" alt="{{ property.title }}">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=80" alt="{{ property.title }}">
+                            {% endif %}
+                            <span class="featured-badge">Featured</span>
+                        </div>
+                        <div class="property-details">
+                            <div class="property-price">₱{{ property.price|number_format(0, '.', ',') }}</div>
+                            <div class="property-title">{{ property.title }}</div>
+                            <div class="property-location">
+                                📍 {{ property.address }}
+                            </div>
+                            <button class="btn-view">View Details</button>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                        <p style="color: #666; font-size: 1.1rem;">No properties available at the moment.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Available Furniture Section -->
+            {% if available_furniture|length > 0 %}
+            <section class="featured">
+                <div class="section-header">
+                    <h2>Available Furniture</h2>
+                    <p>Discover high-quality furniture to complete your home</p>
+                </div>
+                
+                <div class="properties-grid">
+                    {% for furniture in available_furniture %}
+                    <div class="property-card">
+                        <div class="property-image">
+                            {% if furniture.image %}
+                                <img src="{{ asset('uploads/furniture/' ~ furniture.image) }}" alt="{{ furniture.name }}">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80" alt="{{ furniture.name }}">
+                            {% endif %}
+                            <span class="featured-badge">{{ furniture.status }}</span>
+                        </div>
+                        <div class="property-details">
+                            <div class="property-price">₱{{ furniture.price|number_format(2, '.', ',') }}</div>
+                            <div class="property-title">{{ furniture.name }}</div>
+                            <div class="property-location">
+                                📍 Status: {{ furniture.status }}
+                            </div>
+                            <div class="property-location" style="margin-top: 0.5rem;">
+                                📦 Stock: {{ furniture.stock ?? 'N/A' }}
+                            </div>
+                            <button class="btn-view">Add Furniture</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+        </div>
+
+        <!-- Payment Tab Content -->
+        <div id="payment-tab" class="tab-content">
+            <div class="transaction-section">
+                <div class="transaction-header">
+                    <h3 class="section-title-modern">Make a Payment</h3>
+                </div>
+                
+                <form style="max-width: 800px; margin: 0 auto;">
+                    <!-- Property Selection -->
+                    <div style="margin-bottom: 2rem;">
+                        <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 0.5rem; font-size: 0.95rem;">
+                            Select Property <span style="color: #ef4444;">*</span>
+                        </label>
+                        <select name="property" required style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; background: white; color: #1f2937; transition: border-color 0.3s;">
+                            <option value="">-- Choose a Property --</option>
+                            {% for property in all_properties %}
+                                <option value="{{ property.id }}" data-price="{{ property.price }}">
+                                    {{ property.title }} - ₱{{ property.price|number_format(0, '.', ',') }} ({{ property.address }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Payment Amount -->
+                    <div style="margin-bottom: 2rem;">
+                        <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 0.5rem; font-size: 0.95rem;">
+                            Payment Amount <span style="color: #ef4444;">*</span>
+                        </label>
+                        <div style="position: relative;">
+                            <span style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #6b7280; font-weight: 600;">₱</span>
+                            <input type="number" name="amount" id="payment-amount" required step="0.01" min="0.01" 
+                                placeholder="0.00" 
+                                style="width: 100%; padding: 12px 16px 12px 40px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; transition: border-color 0.3s;">
+                        </div>
+                        <p style="margin-top: 0.5rem; color: #6b7280; font-size: 0.875rem;">Enter the amount you wish to pay</p>
+                    </div>
+
+                    <!-- Payment Method Selection -->
+                    <div style="margin-bottom: 2rem;">
+                        <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 1rem; font-size: 0.95rem;">
+                            Payment Method <span style="color: #ef4444;">*</span>
+                        </label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <label style="display: flex; align-items: center; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 12px; cursor: pointer; transition: all 0.3s; background: white;">
+                                <input type="radio" name="payment_method" value="debit_card" required style="margin-right: 0.75rem; width: 20px; height: 20px; cursor: pointer;">
+                                <div>
+                                    <div style="font-weight: 600; color: #1f2937; margin-bottom: 0.25rem;">💳 Debit Card</div>
+                                    <div style="font-size: 0.875rem; color: #6b7280;">Visa, Mastercard</div>
+                                </div>
+                            </label>
+                            
+                            <label style="display: flex; align-items: center; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 12px; cursor: pointer; transition: all 0.3s; background: white;">
+                                <input type="radio" name="payment_method" value="mobile_transfer" required style="margin-right: 0.75rem; width: 20px; height: 20px; cursor: pointer;">
+                                <div>
+                                    <div style="font-weight: 600; color: #1f2937; margin-bottom: 0.25rem;">📱 Mobile Transfer</div>
+                                    <div style="font-size: 0.875rem; color: #6b7280;">GCash, PayMaya</div>
+                                </div>
+                            </label>
+                            
+                            <label style="display: flex; align-items: center; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 12px; cursor: pointer; transition: all 0.3s; background: white;">
+                                <input type="radio" name="payment_method" value="bank_transfer" required style="margin-right: 0.75rem; width: 20px; height: 20px; cursor: pointer;">
+                                <div>
+                                    <div style="font-weight: 600; color: #1f2937; margin-bottom: 0.25rem;">🏦 Bank Transfer</div>
+                                    <div style="font-size: 0.875rem; color: #6b7280;">Direct deposit</div>
+                                </div>
+                            </label>
+                            
+                            <label style="display: flex; align-items: center; padding: 1rem; border: 2px solid #e5e7eb; border-radius: 12px; cursor: pointer; transition: all 0.3s; background: white;">
+                                <input type="radio" name="payment_method" value="cash" required style="margin-right: 0.75rem; width: 20px; height: 20px; cursor: pointer;">
+                                <div>
+                                    <div style="font-weight: 600; color: #1f2937; margin-bottom: 0.25rem;">💵 Cash</div>
+                                    <div style="font-size: 0.875rem; color: #6b7280;">In-person payment</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Additional Details -->
+                    <div style="margin-bottom: 2rem;">
+                        <label style="display: block; font-weight: 600; color: #1f2937; margin-bottom: 0.5rem; font-size: 0.95rem;">
+                            Payment Reference/Notes (Optional)
+                        </label>
+                        <textarea name="notes" rows="3" 
+                            placeholder="Add any payment reference number or notes..."
+                            style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1rem; font-family: inherit; resize: vertical; transition: border-color 0.3s;"></textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                        <button type="button" onclick="resetForm()" 
+                            style="padding: 12px 24px; background: #f3f4f6; color: #374151; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                            Reset
+                        </button>
+                        <button type="submit" 
+                            style="padding: 12px 32px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);">
+                            Process Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Payment History Section -->
+            {% if payments|length > 0 %}
+            <div class="transaction-section" style="margin-top: 2rem;">
+                <div class="transaction-header">
+                    <h3 class="section-title-modern">Payment History</h3>
+                </div>
+                
+                <div class="transaction-table-wrapper">
+                    <table class="transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Payment ID</th>
+                                <th>Transaction ID</th>
+                                <th>Amount</th>
+                                <th>Payment Method</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in payments %}
+                            <tr>
+                                <td>{{ payment.id }}</td>
+                                <td>{{ payment.transaction_id }}</td>
+                                <td>₱{{ payment.amount|number_format(2, '.', ',') }}</td>
+                                <td>{{ payment.payment_method }}</td>
+                                <td>
+                                    <span style="display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 0.875rem; font-weight: 500; 
+                                        {% if payment.status == 'Completed' %}background: #d1fae5; color: #065f46;
+                                        {% elseif payment.status == 'Pending' %}background: #fef3c7; color: #92400e;
+                                        {% elseif payment.status == 'Failed' %}background: #fee2e2; color: #991b1b;
+                                        {% else %}background: #e5e7eb; color: #374151;{% endif %}">
+                                        {{ payment.status }}
+                                    </span>
+                                </td>
+                                <td>{{ payment.date|date('Y-m-d H:i') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <style>
+            label[for], label:has(input[type="radio"]) {
+                transition: all 0.3s;
+            }
+            label:has(input[type="radio"]:checked) {
+                border-color: #3b82f6 !important;
+                background: #eff6ff !important;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+            label:has(input[type="radio"]):hover {
+                border-color: #93c5fd;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+            input[type="number"]:focus, select:focus, textarea:focus {
+                outline: none;
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+            button[type="submit"]:hover {
+                background: #2563eb !important;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 12px rgba(59, 130, 246, 0.3);
+            }
+        </style>
+
+        <script>
+            // Auto-fill amount when property is selected
+            document.querySelector('select[name="property"]').addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const price = selectedOption.getAttribute('data-price');
+                if (price) {
+                    document.getElementById('payment-amount').value = parseFloat(price).toFixed(2);
+                }
+            });
+
+            function resetForm() {
+                document.querySelector('form').reset();
+                document.getElementById('payment-amount').value = '';
+            }
+        </script>
+
+        <script>
+            // Tab switching functionality
+            document.addEventListener('DOMContentLoaded', function() {
+                const tabButtons = document.querySelectorAll('.tab-button');
+                const tabContents = document.querySelectorAll('.tab-content');
+
+                tabButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const targetTab = this.getAttribute('data-tab');
+
+                        // Remove active class from all buttons and contents
+                        tabButtons.forEach(btn => btn.classList.remove('active'));
+                        tabContents.forEach(content => content.classList.remove('active'));
+
+                        // Add active class to clicked button and corresponding content
+                        this.classList.add('active');
+                        document.getElementById(targetTab + '-tab').classList.add('active');
+                    });
+                });
+            });
+
+            // Profile dropdown toggle
+            function toggleProfileDropdown() {
+                const dropdown = document.getElementById('profile-dropdown-menu');
+                dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+            }
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                const profileDropdown = document.querySelector('.profile-dropdown');
+                const dropdownMenu = document.getElementById('profile-dropdown-menu');
+                
+                if (profileDropdown && !profileDropdown.contains(event.target)) {
+                    dropdownMenu.style.display = 'none';
+                }
+            });
+        </script>
+
+        <style>
+            .profile-trigger:hover {
+                background: #e0e7ff !important;
+                transform: translateY(-1px);
+                box-shadow: 0 2px 8px rgba(91, 111, 216, 0.2);
+            }
+            
+            .profile-dropdown-menu a:hover {
+                background: #fef2f2 !important;
+            }
+        </style>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>About Us</h3>
+                    <p>Premium Real Estate platform connecting buyers, sellers and renters to their ideal properties.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#">Properties</a></li>
+                        <li><a href="#">Furniture</a></li>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contact Info</h3>
+                    <p>Email: theamantilloproperty.co</p>
+                    <p>Phone: +1 (555) 123-4567</p>
+                    <p>Address: San Jose Extension Taclobo Dumaguete City</p>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Premium Real Estate. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('styles/dashboard.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="dashboard-wrapper">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="logo-image"></div>
+                <span class="logo-text">The Amantillo Property Co.</span>
+            </div>
+            <button class="sidebar-toggle">☰</button>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <a href="{{ path('app_dashboard') }}" class="sidebar-link {% if app.request.attributes.get('_route') == 'app_dashboard' %}active{% endif %}">
+                <span class="sidebar-icon">📊</span>
+                <span class="sidebar-text">Dashboard</span>
+            </a>
+            <a href="{{ path('app_property_index') }}" class="sidebar-link {% if 'app_property' in app.request.attributes.get('_route') %}active{% endif %}">
+                <span class="sidebar-icon">🏢</span>
+                <span class="sidebar-text">Properties</span>
+            </a>
+            <a href="{{ path('app_furniture_index') }}" class="sidebar-link {% if 'app_furniture' in app.request.attributes.get('_route') %}active{% endif %}">
+                <span class="sidebar-icon">🪑</span>
+                <span class="sidebar-text">Furniture</span>
+            </a>
+            <a href="{{ path('app_listing') }}" class="sidebar-link {% if app.request.attributes.get('_route') == 'app_listing' %}active{% endif %}">
+                <span class="sidebar-icon">📋</span>
+                <span class="sidebar-text">Listings</span>
+            </a>
+            <a href="{{ path('app_transaction_index') }}" class="sidebar-link {% if 'app_transaction' in app.request.attributes.get('_route') %}active{% endif %}">
+                <span class="sidebar-icon">💼</span>
+                <span class="sidebar-text">Transaction</span>
+            </a>
+            <a href="{{ path('app_payment_index') }}" class="sidebar-link {% if 'app_payment' in app.request.attributes.get('_route') %}active{% endif %}">
+                <span class="sidebar-icon">💳</span>
+                <span class="sidebar-text">Payment</span>
+            </a>
+            {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('app_clients_index') }}" class="sidebar-link {% if 'app_clients' in app.request.attributes.get('_route') or 'app_client' in app.request.attributes.get('_route') %}active{% endif %}">
+                <span class="sidebar-icon">👥</span>
+                <span class="sidebar-text">Users Management</span>
+            </a>
+            <a href="{{ path('app_data_records_index') }}" class="sidebar-link {% if 'app_data_records' in app.request.attributes.get('_route') %}active{% endif %}">
+                <span class="sidebar-icon">📊</span>
+                <span class="sidebar-text">All Data Records</span>
+            </a>
+            <a href="{{ path('app_activity_log_index') }}" class="sidebar-link {% if 'app_activity_log' in app.request.attributes.get('_route') %}active{% endif %}">
+                <span class="sidebar-icon">📋</span>
+                <span class="sidebar-text">Activity Logs</span>
+            </a>
+            {% endif %}
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-dashboard">
+        <!-- Top Header with User Profile -->
+        <div class="top-header-bar">
+            <div class="user-profile-container">
+                <div class="user-profile-dropdown" id="userProfileDropdown">
+                    <div class="user-profile-trigger">
+                        <span class="user-icon">👤</span>
+                        <span class="user-greeting">Hi {{ app.user ? app.user.userIdentifier : 'Guest' }}</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </div>
+                    <div class="user-profile-menu" id="userProfileMenu">
+                        <div style="padding: 1rem; border-bottom: 1px solid #e5e7eb; background: #f9fafb;">
+                            <div style="font-weight: 600; color: #1f2937; font-size: 0.95rem;">{{ app.user ? app.user.username : 'Guest' }}</div>
+                            <div style="font-size: 0.875rem; color: #6b7280; margin-top: 0.25rem;">{% if app.user and 'ROLE_ADMIN' in app.user.roles %}Admin Account{% elseif app.user and 'ROLE_STAFF' in app.user.roles %}Staff Account{% else %}User Account{% endif %}</div>
+                        </div>
+                            <a href="{{ path('app_logout') }}" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; color: #dc2626; text-decoration: none; border-radius: 8px; transition: all 0.2s; font-weight: 500; font-size: 0.95rem;">
+                                <span>🚪</span>
+                                <span>Log Out</span>
+                            </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% block content %}{% endblock %}
+    </main>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Sidebar toggle for mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.querySelector('.sidebar-toggle');
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function() {
+                    document.querySelector('.sidebar').classList.toggle('mobile-open');
+                });
+            }
+
+            // User profile dropdown toggle
+            const userProfileTrigger = document.querySelector('.user-profile-trigger');
+            const userProfileMenu = document.getElementById('userProfileMenu');
+            const userProfileDropdown = document.getElementById('userProfileDropdown');
+            
+            if (userProfileTrigger && userProfileMenu && userProfileDropdown) {
+                userProfileTrigger.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    userProfileMenu.classList.toggle('show');
+                    userProfileDropdown.classList.toggle('active');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userProfileDropdown.contains(e.target)) {
+                        userProfileMenu.classList.remove('show');
+                        userProfileDropdown.classList.remove('active');
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}
+
